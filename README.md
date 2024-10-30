@@ -13,7 +13,7 @@ Asegurate de tener una versión actualizada de pip:
 pip install --upgrade pip
 ```
 
-Sobre el ambiente que acabas de crear, puedes usar el proyecto. Automáticamente instalará las librerías necesarias para su uso:
+Sobre el ambiente que acabas de crear, puedes usar el proyecto siempre y cuando tengas el la base de datos cruda ```Info.xlsx```. Automáticamente instalará las librerías necesarias para su uso:
 
 ```
 python main.py
