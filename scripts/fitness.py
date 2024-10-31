@@ -34,7 +34,7 @@ def producto_escaso(individuo, cedis):
     inventario_disponible = cedis.inventario.set_index('Producto')['Ubicado'].to_dict()
     
     # Definir productos escasos con un umbral (por ejemplo, cantidad < 10)
-    umbral_escasez = 10
+    umbral_escasez = 340 # El umbral es el primer cuartil de la distribución de productos ubicados en el inventario
     productos_escasos = {producto for producto, cantidad in inventario_disponible.items() if cantidad < umbral_escasez}
     
     # Calcular el puntaje en función de la prioridad dada a los camiones que más aportan productos escasos
