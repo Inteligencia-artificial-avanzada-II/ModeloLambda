@@ -1,4 +1,4 @@
-from utils.insatll_requirements import install_requirements
+from utils.install_requirements import install_requirements
 install_requirements()
 from utils.process_input_xlsx import process_data
 from utils.load_data_as_objects import cargar_camiones, cargar_ordenes
@@ -27,8 +27,20 @@ def main():
     patio = Patio()
 
     # Step 3: Estrategia evolutiva
+
+    flag = 'DEMANDA'
     try:
-        mejor_orden = evolve(camiones, ordenes)
+        mejor_orden = evolve(flag, camiones, ordenes, cedis)
+        result = [camion.id_camion for camion in mejor_orden]
+        print("PROPUESTA GENERADA.")
+    except Exception as e:
+        return get_response(e)
+    
+    # ------------------------------------------------------------------------------------------------
+
+    flag = "ESCASEZ"
+    try:
+        mejor_orden = evolve(flag, camiones, ordenes, cedis)
         result = [camion.id_camion for camion in mejor_orden]
     except Exception as e:
         return get_response(e)

@@ -1,77 +1,29 @@
 import random
 from collections import defaultdict
 
-# Función de evaluación de la solución
-def fitness(individuo, ordenes):
-    # Filtrar solo las órdenes con status "Created"
-    ordenes_creadas = [orden for orden in ordenes if orden.status == "Created"]
-    
-    # Crear un diccionario con la necesidad total de cada producto de las órdenes creadas
-    necesidad_productos = defaultdict(int)
-    for orden in ordenes_creadas:
-        for producto_info in orden.productos:
-            for producto, cantidades in producto_info.items():
-                necesidad_productos[producto] += cantidades[1]  # 'solicitada'
+from scripts.fitness import producto_demandado, producto_escaso
 
-    # Calcular el puntaje basado en la posición del camión en la lista
-    puntaje_total = 0
-    for posicion, camion in enumerate(individuo):
-        # Calcular la contribución de cada camión según los productos que contiene
-        contribucion_camion = sum(
-            min(cantidad, necesidad_productos[producto])
-            for producto_info in camion.contenido
-            for producto, cantidad in producto_info.items()
-            if producto in necesidad_productos
-        )
-        
-        # Dar más peso a los camiones al inicio de la lista (posición inversa)
-        peso = len(individuo) - posicion  # El primer camión tiene el mayor peso
-        puntaje_total += contribucion_camion * peso
+# Función de evaluación de la solución según la flag
+def fitness(individuo, ordenes, cedis, flag):
+    if flag == "DEMANDA":
+        return producto_demandado(individuo, ordenes)
+    elif flag == "ESCASEZ":
+        return producto_escaso(individuo, cedis)
+    else:
+        raise ValueError("Flag no reconocida. Use 'DEMANDA' o 'ESCASEZ'.")
 
-    return puntaje_total
-
-# Generar la población inicial
-def generar_poblacion_inicial(camiones, tamano_poblacion):
-    poblacion = []
-    for _ in range(tamano_poblacion):
-        individuo = random.sample(camiones, len(camiones))  # Orden aleatorio de camiones
-        poblacion.append(individuo)
-    return poblacion
-
-# Selección del mejor individuo
-def seleccion_mejor(poblacion, ordenes):
-    # Evaluar cada individuo y obtener el de mejor puntaje
-    mejor_individuo = max(poblacion, key=lambda ind: fitness(ind, ordenes))
-    return mejor_individuo
-
-# Función de mutación con varias técnicas basadas en probabilidades
+# Función de mutación para crear variantes del mejor individuo
 def mutacion(individuo):
+    # Realizar pequeñas modificaciones en el orden de camiones
     probabilidad = random.random()
-
-    if probabilidad < 0.20:
-        # 20% de las veces: Mutación por Intercambio Simple
+    
+    if probabilidad < 0.5:
+        # 50% de las veces: Intercambio de dos posiciones aleatorias
         idx1, idx2 = random.sample(range(len(individuo)), 2)
         individuo[idx1], individuo[idx2] = individuo[idx2], individuo[idx1]
     
-    elif probabilidad < 0.40:
-        # 20% de las veces: Mutación por Inversión de Segmento
-        inicio = random.randint(0, len(individuo) - 2)
-        fin = random.randint(inicio + 1, len(individuo) - 1)
-        individuo[inicio:fin] = reversed(individuo[inicio:fin])
-    
-    elif probabilidad < 0.60:
-        # 20% de las veces: Mutación por Intercambio Múltiple
-        num_intercambios = random.randint(2, 5)  # Definir cuántos intercambios hacer
-        for _ in range(num_intercambios):
-            idx1, idx2 = random.sample(range(len(individuo)), 2)
-            individuo[idx1], individuo[idx2] = individuo[idx2], individuo[idx1]
-
-    elif probabilidad < 0.80:
-        # 20% de las veces: Mutación por Intercambio Total
-        return random.sample(individuo, len(individuo))
-    
     else:
-        # 20% de las veces: Mutación por Inserción
+        # 50% de las veces: Insertar un camión en una posición aleatoria
         idx1 = random.randint(0, len(individuo) - 1)
         idx2 = random.randint(0, len(individuo) - 1)
         camion = individuo.pop(idx1)
@@ -79,30 +31,33 @@ def mutacion(individuo):
     
     return individuo
 
-# Estrategia evolutiva
-def evolve(camiones, ordenes, tamano_poblacion=30, num_generaciones=30):
-    # Generar la población inicial
-    poblacion = generar_poblacion_inicial(camiones, tamano_poblacion)
+
+# Estrategia evolutiva con mejora continua
+def evolve(flag, camiones, ordenes, cedis, tamano_poblacion=30, num_generaciones=100):
+    # Generar un individuo inicial como el mejor hasta ahora
+    mejor_individuo = random.sample(camiones, len(camiones))
+    mejor_puntaje = fitness(mejor_individuo, ordenes, cedis, flag)
 
     for generacion in range(num_generaciones):
         print(f"\n--- Generación {generacion + 1} ---")
         
-        # Evaluar y seleccionar el mejor individuo de la población
-        mejor_individuo = seleccion_mejor(poblacion, ordenes)
+        # Crear una nueva población a partir de mutaciones del mejor individuo
+        nueva_poblacion = [mutacion(list(mejor_individuo)) for _ in range(tamano_poblacion)]
         
-        # Evaluar el mejor puntaje de la generación actual
-        mejor_puntaje = fitness(mejor_individuo, ordenes)
+        # Evaluar la nueva población para encontrar el mejor individuo
+        mejor_individuo_generacion = max(nueva_poblacion, key=lambda ind: fitness(ind, ordenes, cedis, flag))
+        mejor_puntaje_generacion = fitness(mejor_individuo_generacion, ordenes, cedis, flag)
+        
+        # Comparar el mejor de esta generación con el mejor global
+        if mejor_puntaje_generacion >= mejor_puntaje:
+            mejor_individuo = mejor_individuo_generacion
+            mejor_puntaje = mejor_puntaje_generacion
+        
+        # Imprimir el puntaje del mejor individuo en esta generación
         print(f"Mejor puntaje de la generación {generacion + 1}: {mejor_puntaje}")
-        
-        # Imprimir el mejor individuo en esta generación (orden de camiones)
         print("Mejor individuo (orden de camiones):", [camion.id_camion for camion in mejor_individuo])
-
-        # Aplicar mutación para crear una nueva población
-        nueva_poblacion = [mutacion(mejor_individuo) for _ in range(tamano_poblacion)]
-        poblacion = nueva_poblacion
 
     print('-'*50)
 
     # Retornar el mejor orden final
-    mejor_orden = seleccion_mejor(poblacion, ordenes)
-    return mejor_orden
+    return mejor_individuo
