@@ -16,16 +16,16 @@ def producto_escaso(individuo, cedis):
     # Calcular el puntaje en función de la prioridad dada a los camiones que más aportan productos escasos
     puntaje_total = 0
     for posicion, camion in enumerate(individuo):
-        # Calcular la contribución del camión a los productos escasos
+        # Calcular la contribución del camión a los productos escasos con un peso adicional inversamente proporcional a la cantidad disponible
         contribucion_escasa = sum(
-            cantidad for producto_info in camion.contenido
+            cantidad * (umbral_escasez / (inventario_disponible[producto] + 1))
+            for producto_info in camion.contenido
             for producto, cantidad in producto_info.items()
             if producto in productos_escasos
         )
         
-        # Dar más peso a camiones con alta contribución en posiciones iniciales
-        peso = len(individuo) - posicion
-        puntaje_total += contribucion_escasa * peso
+        # Sumar la contribución del camión al puntaje total
+        puntaje_total += contribucion_escasa
 
     return puntaje_total
 
@@ -33,7 +33,7 @@ def producto_ordenes(individuo, ordenes):
     """
     Priorizar el producto que cumpla con las órdenes, dándole un peso mayor a las órdenes tipo 'FP'
     """
-    # Filtrar solo las órdenes con status "Created"
+    # Filtrar solo las órdenes con status "Created" o "Partly Allocated"
     ordenes_creadas = [orden for orden in ordenes if orden.status == "Created" | "Partly Allocated"]
 
     # Crear un diccionario con la necesidad total de cada producto por cada tipo de orden
