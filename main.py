@@ -5,7 +5,7 @@ from utils.load_data_as_objects import cargar_camiones, cargar_ordenes
 from utils.response import get_response
 from objects.cedis import CEDIS
 from objects.patio import Patio
-from scripts.genetico import algoritmo_evolutivo
+from scripts.estrategia_evolutiva import evolve
 
 def main():
 
@@ -26,9 +26,9 @@ def main():
     cedis = CEDIS(n_fosas=8,path_inventario='data/inventario.csv')
     patio = Patio()
 
-    # Step 3: Algoritmo genético
+    # Step 3: Estrategia evolutiva
     try:
-        mejor_orden = algoritmo_evolutivo(camiones, ordenes)
+        mejor_orden = evolve(camiones, ordenes)
         result = [camion.id_camion for camion in mejor_orden]
     except Exception as e:
         return get_response(e)

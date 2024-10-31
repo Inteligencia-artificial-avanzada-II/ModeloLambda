@@ -79,8 +79,8 @@ def mutacion(individuo):
     
     return individuo
 
-# Algoritmo evolutivo simplificado sin cruce
-def algoritmo_evolutivo(camiones, ordenes, tamano_poblacion=20, num_generaciones=20):
+# Estrategia evolutiva
+def evolve(camiones, ordenes, tamano_poblacion=30, num_generaciones=30):
     # Generar la población inicial
     poblacion = generar_poblacion_inicial(camiones, tamano_poblacion)
 
