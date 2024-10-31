@@ -34,7 +34,7 @@ def producto_escaso(individuo, cedis):
     inventario_disponible = cedis.inventario.set_index('Producto')['Ubicado'].to_dict()
     
     # Definir productos escasos con un umbral (por ejemplo, cantidad < 10)
-    umbral_escasez = 340 # El umbral es el primer cuartil de la distribución de productos ubicados en el inventario
+    umbral_escasez = 10
     productos_escasos = {producto for producto, cantidad in inventario_disponible.items() if cantidad < umbral_escasez}
     
     # Calcular el puntaje en función de la prioridad dada a los camiones que más aportan productos escasos
@@ -53,10 +53,20 @@ def producto_escaso(individuo, cedis):
 
     return puntaje_total
 
-def tiempo_descarga():
-    # priorizar camiones con poco producto
-    pass
+def menor_producto(individuo):
+    # Inicializar el puntaje total
+    puntaje_total = 0
+    
+    for posicion, camion in enumerate(individuo):
+        # Calcular la cantidad total de producto en el camión
+        carga_total = sum(
+            cantidad for producto_info in camion.contenido
+            for cantidad in producto_info.values()
+        )
+        
+        # Dar más peso a los camiones con menor carga en posiciones iniciales
+        peso = len(individuo) - posicion
+        # Invertimos la carga total para que los camiones con menos carga reciban más puntaje
+        puntaje_total += (1 / (1 + carga_total)) * peso
 
-def mayoreo():
-    # priorizar producto que cumple con ordenes de mayoreo (tipo de producto)
-    pass
+    return puntaje_total

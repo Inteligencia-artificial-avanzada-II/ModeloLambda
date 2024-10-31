@@ -8,47 +8,69 @@ from objects.patio import Patio
 from scripts.estrategia_evolutiva import evolve
 
 def main():
-
+    errors = {}
+    
     # Step 1: Procesar el archivo de entrada
     try:
         process_data('Info.xlsx')
     except Exception as e:
-        return get_response(e)
+        errors["input_data"] = "Error al procesar los datos de entrada: " + str(e)
+        print(errors)
+        return get_response(errors)
 
     # Step 2: crear los objetos
     try:
         camiones = cargar_camiones('data/camiones.csv')
         ordenes = cargar_ordenes('data/ordenes.csv')
     except Exception as e:
+        errors["data_load"] = "Error al cargar los datos: " + str(e)
+        print(errors)
         return get_response(e)
 
-    camiones = camiones[:5]
+    camiones = camiones[:10]
     cedis = CEDIS(n_fosas=8,path_inventario='data/inventario.csv')
     patio = Patio()
 
     # Step 3: Estrategia evolutiva
+    # _flag -> mejor fitness de cada flag, en caso de necesitarse en el futuro
+
+    results = {}
 
     flag = 'DEMANDA'
     try:
-        mejor_orden = evolve(flag, camiones, ordenes, cedis)
-        result = [camion.id_camion for camion in mejor_orden]
+        mejor_orden_demanda, _demanda, gens_demanda = evolve(flag, camiones, ordenes, cedis)
+        result_demanda = [camion.id_camion for camion in mejor_orden_demanda]
+        results["propuesta_demanda"] = result_demanda
         print("PROPUESTA GENERADA.")
     except Exception as e:
-        return get_response(e)
+        errors["propuesta_demanda"] = "Error al generar propuesta DEMANDA: " + str(e)
+        print("Error al generar propuesta DEMANDA:\n", e)
     
     # ------------------------------------------------------------------------------------------------
 
     flag = "ESCASEZ"
     try:
-        mejor_orden = evolve(flag, camiones, ordenes, cedis)
-        result = [camion.id_camion for camion in mejor_orden]
+        mejor_orden_escasez, _escasez, gens_escasez = evolve(flag, camiones, ordenes, cedis)
+        result_escasez = [camion.id_camion for camion in mejor_orden_escasez]
+        results["propuesta_escasez"] = result_escasez
+        print("PROPUESTA GENERADA.")
     except Exception as e:
-        return get_response(e)
+        errors["propuesta_escasez"] = "Error al generar propuesta ESCASEZ: " + str(e)
+        print("Error al generar propuesta ESCASEZ:\n", e)
 
-    print("Propuesta generada")
-    return get_response(response_list=result)
-    # TO DO:
-    """
-    - crear matriz de pruebas con datos sinteticos para evaluar las distintas funciones de fitness (maybe | flojera)
-    """
-main()
+    # ------------------------------------------------------------------------------------------------
+
+    flag = "CARGA"
+    try:
+        mejor_orden_carga, _carga, gens_carga = evolve(flag, camiones, ordenes, cedis)
+        result_carga = [camion.id_camion for camion in mejor_orden_carga]
+        results["propuesta_carga"] = result_carga
+        print("PROPUESTA GENERADA.")
+    except Exception as e:
+        errors["propuesta_carga"] = "Error al generar propuesta CARGA: " + str(e)
+        print("Error al generar propuesta CARGA:\n", e)
+
+    return get_response(e=errors,propuestas=results)
+
+if __name__ == "__main__":
+    main()
