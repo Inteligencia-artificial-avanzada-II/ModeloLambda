@@ -4,7 +4,7 @@ from collections import defaultdict
 # Función de evaluación de la solución
 def fitness(individuo, ordenes):
     # Filtrar solo las órdenes con status "Created"
-    ordenes_creadas = [orden for orden in ordenes if orden.status == "Created"]
+    ordenes_creadas = [orden for orden in ordenes if orden.status == "Created" | "Partly Allocated"]
     
     # Crear un diccionario con la necesidad total de cada producto de las órdenes creadas
     necesidad_productos = defaultdict(int)
