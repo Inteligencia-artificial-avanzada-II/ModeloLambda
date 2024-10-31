@@ -1,17 +1,37 @@
 # EN ESTE SCRIPT SE IMPLEMENTARÁN LAS DISTINTAS FITNESS FUNCTIONS.
 from collections import defaultdict
 
-def producto_escaso():
+def producto_escaso(individuo, cedis):
+    """ 
+    Priorizar el llenado de los productos escasos en el almacén
+    """
     # priorizar producto escaso en almacen
-    pass
+    # Crear un diccionario de disponibilidad de productos con la columna 'Producto' y 'Ubicado' del inventario
+    inventario_disponible = cedis.inventario.set_index('Producto')['Ubicado'].to_dict()
+    
+    # Definir productos escasos con un umbral 
+    umbral_escasez = 340 # El umbral es el primer cuartil de la distribución de productos ubicados en el inventario
+    productos_escasos = {producto for producto, cantidad in inventario_disponible.items() if cantidad < umbral_escasez}
+    
+    # Calcular el puntaje en función de la prioridad dada a los camiones que más aportan productos escasos
+    puntaje_total = 0
+    for posicion, camion in enumerate(individuo):
+        # Calcular la contribución del camión a los productos escasos
+        contribucion_escasa = sum(
+            cantidad for producto_info in camion.contenido
+            for producto, cantidad in producto_info.items()
+            if producto in productos_escasos
+        )
+        
+        # Dar más peso a camiones con alta contribución en posiciones iniciales
+        peso = len(individuo) - posicion
+        puntaje_total += contribucion_escasa * peso
 
-def tiempo_espera():
-    # priorizar camiones con poco producto
-    pass
+    return puntaje_total
 
 def producto_ordenes(individuo, ordenes):
     """
-    priorizar producto que cumple con ordenes de mayoreo (tipo de producto)
+    Priorizar el producto que cumpla con las órdenes, dándole un peso mayor a las órdenes tipo 'FP'
     """
     # Filtrar solo las órdenes con status "Created"
     ordenes_creadas = [orden for orden in ordenes if orden.status == "Created" | "Partly Allocated"]
@@ -50,3 +70,7 @@ def producto_ordenes(individuo, ordenes):
         puntaje_total += (peso_fp * contribucion_camion_fp) * contribucion_camion_pk 
 
     return puntaje_total
+
+def tiempo_espera():
+    # priorizar camiones con poco producto
+    pass
