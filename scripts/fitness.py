@@ -1,14 +1,11 @@
 # EN ESTE SCRIPT SE IMPLEMENTARÁN LAS DISTINTAS FITNESS FUNCTIONS.
-
-def producto_demandado():
-    # priorizar producto demandado en ordenes 
-    pass
+from collections import defaultdict
 
 def producto_escaso():
     # priorizar producto escaso en almacen
     pass
 
-def tiempo_descarga():
+def tiempo_espera():
     # priorizar camiones con poco producto
     pass
 
