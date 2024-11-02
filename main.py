@@ -3,6 +3,7 @@ install_requirements()
 from utils.process_input_xlsx import process_data
 from utils.load_data_as_objects import cargar_camiones, cargar_ordenes
 from utils.response import get_response
+from utils.delete_cache import delete_pycache
 from objects.cedis import CEDIS
 from objects.patio import Patio
 from scripts.estrategia_evolutiva import evolve
@@ -48,15 +49,27 @@ def main():
     
     # ------------------------------------------------------------------------------------------------
 
-    flag = "ESCASEZ"
+    flag = "FP"
     try:
-        mejor_orden_escasez, _escasez, gens_escasez = evolve(flag, camiones, ordenes, cedis)
-        result_escasez = [camion.id_camion for camion in mejor_orden_escasez]
-        results["propuesta_escasez"] = result_escasez
+        mejor_orden_FP, _FP, gens_FP = evolve(flag, camiones, ordenes, cedis)
+        result_FP = [camion.id_camion for camion in mejor_orden_FP]
+        results["propuesta_FP"] = result_FP
         print("PROPUESTA GENERADA.")
     except Exception as e:
-        errors["propuesta_escasez"] = "Error al generar propuesta ESCASEZ: " + str(e)
-        print("Error al generar propuesta ESCASEZ:\n", e)
+        errors["propuesta_FP"] = "Error al generar propuesta FP: " + str(e)
+        print("Error al generar propuesta FP:\n", e)
+
+    # ------------------------------------------------------------------------------------------------
+
+    flag = "PK"
+    try:
+        mejor_orden_PK, _PK, gens_PK = evolve(flag, camiones, ordenes, cedis)
+        result_PK = [camion.id_camion for camion in mejor_orden_PK]
+        results["propuesta_PK"] = result_PK
+        print("PROPUESTA GENERADA.")
+    except Exception as e:
+        errors["propuesta_PK"] = "Error al generar propuesta PK: " + str(e)
+        print("Error al generar propuesta PK:\n", e)
 
     # ------------------------------------------------------------------------------------------------
 
@@ -70,6 +83,8 @@ def main():
         errors["propuesta_carga"] = "Error al generar propuesta CARGA: " + str(e)
         print("Error al generar propuesta CARGA:\n", e)
 
+
+    delete_pycache()
     return get_response(e=errors,propuestas=results)
 
 if __name__ == "__main__":
