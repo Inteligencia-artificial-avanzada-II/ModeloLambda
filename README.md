@@ -1,4 +1,6 @@
-# Prioridad de acceso a CEDIS | Solución para Bimbo con algoritmos genéticos
+# Prioridad de acceso a CEDIS | Solución para Bimbo con estrategia evolutiva
+
+## Ejecución
 
 Después de clonar el repositorio, crea un ambiente de conda:
 
@@ -13,8 +15,4 @@ Asegurate de tener una versión actualizada de pip:
 pip install --upgrade pip
 ```
 
-Sobre el ambiente que acabas de crear, puedes usar el proyecto siempre y cuando tengas el la base de datos cruda ```Info.xlsx```. Automáticamente instalará las librerías necesarias para su uso:
-
-```
-python main.py
-```
+El proyecto no es utilizable ya que se tiene que recibir las ordenes y remolques a través de producción
