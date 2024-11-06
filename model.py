@@ -4,7 +4,6 @@ from utils.response import get_response
 from utils.delete_cache import delete_pycache
 from scripts.estrategia_evolutiva import evolve
 
-
 def model(remolques,ordenes,productos_urgentes):
     errors = None
     result = []

@@ -22,7 +22,10 @@ def mutacion(individuo, probs):
 # Estrategia evolutiva con mejora continua
 def evolve(remolques, ordenes, productos_urgentes, tamano_poblacion=30, num_generaciones=20, probs=0.5):
     # Generar un individuo inicial como el mejor hasta ahora
-    mejor_individuo = random.sample(remolques, len(remolques))
+    mejor_individuo = remolques
+    print("El primer individuo es el orden actual en el que entra la lista")
+    print([remolque.id_remolque for remolque in mejor_individuo])
+
     mejor_puntaje = fitness(mejor_individuo, ordenes, productos_urgentes)
     generacion_max = 0  # Registrar la generación en la que se alcanza el mejor puntaje TEMPORAL
 
